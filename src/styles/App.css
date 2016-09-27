@@ -7,7 +7,8 @@ body {
 
 body {
     font-family: sans-serif;
-    background: #eee;
+    background: #333;
+    color: #e2e2e2;
 }
 
 * {
@@ -114,3 +115,14 @@ h1 {
         transform: translate(-20px);
     }
 } 
+
+ul {
+    list-style: none;
+    text-align: center;
+    margin: 0;
+}
+
+li {
+    display: inline-block;
+    margin: 3px;
+}

@@ -8,16 +8,25 @@ export default class App extends React.Component {
     super();
     
     this.state = {
-      isLoading: true
+      isLoading: true,
+      images: [],
+      lastIndex: 0,
     };
 
-    setTimeout(() => {
-      this.setState({isLoading: false})
-    }, 3000);
+    this.serverResponse = fetch('http://192.168.0.138/studio-photos.php').then(r => r.json());
+
+    this.loadNextData();
+  }
+
+  loadNextData () {
+    this.serverResponse.then(d => {
+      const lastIndex = this.state.lastIndex + 12;
+      this.setState({isLoading:false, lastIndex, images: d.images.slice(0,lastIndex)});
+    });
   }
 
   render () {
-    const { isLoading } = this.state;
+    const { isLoading, images } = this.state;
 
     return (
       <div>
@@ -31,8 +40,15 @@ export default class App extends React.Component {
           }
         </div>
         <div className={styles.container}>
-          <h1>Project Template</h1>
-          <p>There's more going on down here.</p>
+          <ul>
+            {
+              images.map(image => {
+                const src = 'http://192.168.0.138/studio-photos.php?image=' + encodeURIComponent(image);
+                return <li key={image}><img src={src} width="150" height="150"/></li>
+              })
+            }
+          </ul>
+          <button onClick={()=>this.loadNextData()}>Load More</button>
         </div>
       </div>
     )
