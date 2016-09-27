@@ -9,7 +9,7 @@ if(isset($_GET['image'])){
     $thumb = !isset($_GET['full']);
     serveImage($root, $_GET['image'], $thumb);
 } else {
-    serveImageList(getImageList($root));
+    printImageList(getImageList($root));
 }
 
 function getImageList($root) {
@@ -18,6 +18,8 @@ function getImageList($root) {
         glob($root . '/**/**/**/*.{jpg,JPG}', GLOB_BRACE),
         glob($root . '/**/**/**/**/*.{jpg,JPG}', GLOB_BRACE)
     );
+
+    $most_files = array_filter($most_files, "image_is_not_thumb");
 
     sort($most_files);
 
@@ -29,11 +31,16 @@ function getImageList($root) {
 }
 
 function local_path($fullpath) {
+    // TODO: woops! bad global variable
     global $root_length;
     return substr($fullpath, $root_length);
 }
 
-function serveImageList($list) {
+function image_is_not_thumb($path) {
+    return strpos($path, "/thumbs/") === false;
+}
+
+function printImageList($list) {
     
     $json = json_encode(array("images" => $list));
 
@@ -58,7 +65,7 @@ function serveImage($root, $path, $thumb=false) {
             if(!file_exists($thumbs_dir)){
                 mkdir($thumbs_dir);
             }
-            make_thumb($file_path, $thumb_path, 300);
+            make_thumb($file_path, $thumb_path, 150);
             serve_image_file($thumb_path);
         }
     }
@@ -76,21 +83,41 @@ function serve_image_file($file_path) {
     echo file_get_contents($file_path);
 }
 
-function make_thumb($src, $dest, $desired_width) {
+function make_thumb($src, $dest, $desired_size) {
 
 	/* read the source image */
 	$source_image = imagecreatefromjpeg($src);
 	$width = imagesx($source_image);
 	$height = imagesy($source_image);
-	
-	/* find the "desired height" of this thumbnail, relative to the desired width  */
-	$desired_height = floor($height * ($desired_width / $width));
+    $xOffset = 0;
+    $yOffset = 0;
+    $scaledWidth = $width;
+    $scaledHeight = $height;
+    $ratio = $height / $width;
+
+    $desired_height = $desired_size;
+    $desired_width = $desired_size;
+
+    // TODO: Accomodate different target ratios
+    if($ratio < 1) {
+        // Landscape photo
+        $scale = $desired_height / $height;
+        $scaledWidth = $desired_width / $scale;
+        $xOffset = ($width - $scaledWidth) / 2;
+    }
+	else {
+        // Portrait Photo
+        $scale = $desired_width / $width;
+        $scaledHeight = $desired_height / $scale;
+        $yOffset = ($height - $scaledHeight) / 2;
+    }
 	
 	/* create a new, "virtual" image */
 	$virtual_image = imagecreatetruecolor($desired_width, $desired_height);
 	
 	/* copy source image at a resized size */
-	imagecopyresampled($virtual_image, $source_image, 0, 0, 0, 0, $desired_width, $desired_height, $width, $height);
+	// imagecopyresized($virtual_image, $source_image, 0, 0, $xOffset, $yOffset, $desired_width, $desired_height, $scaledWidth, $scaledHeight);
+	imagecopyresampled($virtual_image, $source_image, 0, 0, $xOffset, $yOffset, $desired_width, $desired_height, $scaledWidth, $scaledHeight);
 	
 	/* save thumbnail to destination */
 	imagejpeg($virtual_image, $dest);
