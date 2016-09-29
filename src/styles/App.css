@@ -125,4 +125,27 @@ ul {
 li {
     display: inline-block;
     margin: 3px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 1px 1px 2px black;
+}
+
+p {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: white;
+    text-decoration: none;
+    background: rgba(0,0,0,0.3);
+    text-align: left;
+    margin: 0;
+    padding: 0 3px;
+    height: 0;
+    transition: height 0.25s;
+}
+
+li:hover p {
+    height: 24px;
+    padding: 3px;
 }
