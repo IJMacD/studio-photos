@@ -43,13 +43,14 @@ input[type=search] {
 }
 
 .jumbotron {
-  background: #532F8C;
+  background: #21b077;
   color: white;
   padding: 48px 0 80px;
   margin-bottom: 30px;
   text-align: center; }
   .jumbotron h1 {
     font-size: 63px;
+    text-shadow: 4px 4px 6px rgba(0,0,0,0.6);
   }
   .jumbotron p {
     margin-bottom: 15px;
@@ -60,7 +61,7 @@ input[type=search] {
     margin: 1em auto 2em; }
 
 .toolbar {
-    background: #532F8C;
+    background: #21b077;
     color: white;
     padding: 12px 8px;
     position: fixed;
@@ -75,6 +76,7 @@ input[type=search] {
     margin: 0;
     font-weight: bold;
     flex: 1;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
 }
 .toolbar input[type=search] {
     flex: 0;
