@@ -54,14 +54,8 @@ export default class InfiniteScroll extends Component {
 
     const selected = items.slice(firstIndex, lastIndex);
 
-    return (
-      <WrapComponent style={{paddingTop: (firstRow * itemHeight), height: (itemHeight * numRows)}}>
-      {
-        selected.map(item => (
-          <ItemComponent key={item.key} {...item} />
-        ))
-      }
-      </WrapComponent>
-    )
+    const style = { paddingTop: (firstRow * itemHeight), height: (itemHeight * numRows) };
+
+    return this.props.children(selected, style);
   }
 }

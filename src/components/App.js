@@ -1,4 +1,5 @@
 import React from 'react'
+import path from 'path'
 
 import InfiniteScroll from './InfiniteScroll.js';
 
@@ -41,7 +42,7 @@ export default class App extends React.Component {
           key: img + i,
           thumb: img,
           full: img,
-          name: img.substr(slashIndex),
+          name: i,
         }
       }
     }
@@ -49,6 +50,8 @@ export default class App extends React.Component {
     fetch(imageIndexURL).then(r => r.json()).then(d => {
       const items = d.images.map(inflateImage);
       this.setState({isLoading: false, items});
+    }).catch(() => {
+      this.setState({ isLoading: false });
     });
 
     this.handleScroll = this.handleScroll.bind(this);
@@ -97,15 +100,29 @@ export default class App extends React.Component {
         <div className={styles.container} style={{marginTop: isScrolled ? 48: 0}}>
           <InfiniteScroll
             items={filteredList}
-            ItemComponent={ListItem}
-            WrapComponent="ul"
             itemHeight="156"
             itemWidth="156"
-          />
+          >
+            {
+              renderList
+            }
+          </InfiniteScroll>
         </div>
       </div>
     )
   }
+}
+
+const renderList = (items, {paddingTop, height}) => {
+  const midPoint = items && items[Math.floor(items.length/2)];
+  return [
+    <ul style={{ paddingTop, height }}>
+      {
+        items.map(item => <ListItem {...item} />)
+      }
+    </ul>,
+    midPoint && <div className={styles.toast}><p>{dirname(midPoint.key)}</p></div>
+  ];
 }
 
 const ListItem = (props) => {
@@ -117,4 +134,8 @@ const ListItem = (props) => {
         <p>{ name }</p>
       </a>
     </li>);
+}
+
+function dirname (p) {
+  return path.basename(path.dirname(p));
 }
