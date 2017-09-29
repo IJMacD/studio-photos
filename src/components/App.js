@@ -20,6 +20,7 @@ export default class App extends React.Component {
       isLoading: true,
       items: [],
       isScrolled: false,
+      searchTerm: "",
     };
 
     let inflateImage = img => {
@@ -51,6 +52,7 @@ export default class App extends React.Component {
     });
 
     this.handleScroll = this.handleScroll.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
   }
 
   handleScroll () {
@@ -58,6 +60,10 @@ export default class App extends React.Component {
     if (this.state.isScrolled != scrolled) {
       this.setState({ isScrolled: scrolled });
     }
+  }
+
+  handleSearch (e) {
+    this.setState({ searchTerm: e.target.value });
   }
 
   componentDidMount () {
@@ -69,7 +75,13 @@ export default class App extends React.Component {
   }
 
   render () {
-    const { isLoading, items, isScrolled } = this.state;
+    const { isLoading, items, isScrolled, searchTerm } = this.state;
+
+    let filteredList = items;
+
+    if (searchTerm) {
+      filteredList = filteredList.filter(item => item.key.includes(searchTerm));
+    }
 
     return (
       <div>
@@ -77,13 +89,14 @@ export default class App extends React.Component {
           <h1>
             Studio Photos
           </h1>
+          <input type="search" placeholder="Search" onChange={this.handleSearch} value={searchTerm} />
         </div>
         { isLoading &&
           <p className={styles.loading2}>Loading</p>
         }
-        <div className={styles.container}>
+        <div className={styles.container} style={{marginTop: isScrolled ? 48: 0}}>
           <InfiniteScroll
-            items={items}
+            items={filteredList}
             ItemComponent={ListItem}
             WrapComponent="ul"
             itemHeight="156"

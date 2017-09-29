@@ -36,6 +36,12 @@ h1 {
     font-size: 36px;
 }
 
+input[type=search] {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #DDD;
+}
+
 .jumbotron {
   background: #532F8C;
   color: white;
@@ -58,22 +64,20 @@ h1 {
     color: white;
     padding: 12px 8px;
     position: fixed;
+    top: 0;
     height: 48px;
     width: 100%;
     z-index: 2;
+    display: flex;
 }
 .toolbar h1 {
     font-size: 24px;
     margin: 0;
     font-weight: bold;
+    flex: 1;
 }
-.toolbar p {
-    margin-bottom: 15px;
-    font-size: 21px;
-    font-weight: 200;
-    color: #d9ccee;
-    max-width: 75%;
-    margin: 1em auto 2em;
+.toolbar input[type=search] {
+    flex: 0;
 }
 
 .container {
