@@ -53,13 +53,36 @@ h1 {
     max-width: 75%;
     margin: 1em auto 2em; }
 
+.toolbar {
+    background: #532F8C;
+    color: white;
+    padding: 12px 8px;
+    position: fixed;
+    height: 48px;
+    width: 100%;
+    z-index: 2;
+}
+.toolbar h1 {
+    font-size: 24px;
+    margin: 0;
+    font-weight: bold;
+}
+.toolbar p {
+    margin-bottom: 15px;
+    font-size: 21px;
+    font-weight: 200;
+    color: #d9ccee;
+    max-width: 75%;
+    margin: 1em auto 2em;
+}
+
 .container {
     margin: 0 30px;
 }
 
 .loading {
     width: 100%;
-    color: black;
+    color: white;
     margin-top: 10%;
     font-size: 1.2em;
     font-weight: bold;
@@ -89,7 +112,7 @@ h1 {
     to {
         transform: rotate(360deg)
     }
-} 
+}
 
 .loading2::before {
     content: "";
@@ -114,12 +137,13 @@ h1 {
     to {
         transform: translate(-20px);
     }
-} 
+}
 
 ul {
     list-style: none;
     text-align: center;
     margin: 0;
+    padding: 0;
 }
 
 li {
@@ -130,7 +154,7 @@ li {
     box-shadow: 1px 1px 2px black;
 }
 
-p {
+li p {
     position: absolute;
     left: 0;
     right: 0;

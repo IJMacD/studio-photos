@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { findDOMNode } from 'react-dom';
 
 export default class InfiniteScroll extends Component {
   constructor () {
@@ -22,21 +23,17 @@ export default class InfiniteScroll extends Component {
     this.resizeCallback = () => {
       this.setState({
         availableHeight: document.body.offsetHeight,
-        availableWidth: document.body.offsetWidth,
+        availableWidth: findDOMNode(this).clientWidth,
       });
     }
     window.addEventListener("resize", this.resizeCallback);
-    
+
     this.resizeCallback();
   }
 
   componentWillUnmount() {
-    if(this.scrollCallback){
-      window.removeEventListener("scroll", this.scrollCallback);
-    }
-    if(this.resizeCallback){
-      window.removeEventListener("resize", this.resizeCallback);
-    }
+    window.removeEventListener("scroll", this.scrollCallback);
+    window.removeEventListener("resize", this.resizeCallback);
   }
 
   render () {
