@@ -56,6 +56,8 @@ export default class App extends React.Component {
 
     this.handleScroll = this.handleScroll.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
+
+    this.filterSelector = createSelector(searchTerm => this.state.items.filter(item => item.key.includes(searchTerm)));
   }
 
   handleScroll () {
@@ -83,7 +85,7 @@ export default class App extends React.Component {
     let filteredList = items;
 
     if (searchTerm) {
-      filteredList = filteredList.filter(item => item.key.includes(searchTerm));
+      filteredList = this.filterSelector(searchTerm);
     }
 
     return (
@@ -138,4 +140,16 @@ const ListItem = (props) => {
 
 function dirname (p) {
   return path.basename(path.dirname(p));
+}
+
+function createSelector (fn) {
+  let prevArg, prevResult;
+
+  return function (arg) {
+    if (arg != prevArg) {
+      prevArg = arg;
+      prevResult = fn(arg);
+    }
+    return prevResult;
+  }
 }
