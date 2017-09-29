@@ -5,7 +5,17 @@ module.exports = {
   devtool: 'eval',
 
   entry: [
-    'webpack-hot-middleware/client',
+    'react-hot-loader/patch',
+    // activate HMR for React
+
+    'webpack-dev-server/client?http://localhost:3000',
+    // bundle the client for webpack-dev-server
+    // and connect to the provided endpoint
+
+    'webpack/hot/only-dev-server',
+    // bundle the client for hot reloading
+    // only- means to only hot reload for successful updates
+
     './src/index'
   ],
 
@@ -40,5 +50,18 @@ module.exports = {
         loader: 'file-loader',
       }
     ]
-  }
+  },
+
+  devServer: {
+    host: 'localhost',
+    port: 3000,
+
+    historyApiFallback: true,
+    // respond to 404s with index.html
+
+    hot: true,
+    // enable HMR on the server
+
+    contentBase: "./",
+  },
 }

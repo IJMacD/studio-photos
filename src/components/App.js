@@ -41,7 +41,7 @@ export default class App extends React.Component {
           key: img + i,
           thumb: img,
           full: img,
-          name: img.substr(slashIndex),
+          name: i,
         }
       }
     }
