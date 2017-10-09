@@ -24,6 +24,22 @@ export default class App extends React.Component {
       searchTerm: "",
     };
 
+    this.handleScroll = this.handleScroll.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
+  }
+
+  handleScroll () {
+    const scrolled = window.scrollY > 20;
+    if (this.state.isScrolled != scrolled) {
+      this.setState({ isScrolled: scrolled });
+    }
+  }
+
+  handleSearch (e) {
+    this.setState({ searchTerm: e.target.value });
+  }
+
+  componentDidMount () {
     let inflateImage = img => {
       const slashIndex = img.lastIndexOf('/') + 1;
       const encodedURI = encodeURIComponent(img);
@@ -49,27 +65,11 @@ export default class App extends React.Component {
 
     fetch(imageIndexURL).then(r => r.json()).then(d => {
       const items = d.images.map(inflateImage);
-      this.setState({isLoading: false, items});
+      this.setState({ isLoading: false, items });
     }).catch(() => {
       this.setState({ isLoading: false });
     });
 
-    this.handleScroll = this.handleScroll.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-  }
-
-  handleScroll () {
-    const scrolled = window.scrollY > 20;
-    if (this.state.isScrolled != scrolled) {
-      this.setState({ isScrolled: scrolled });
-    }
-  }
-
-  handleSearch (e) {
-    this.setState({ searchTerm: e.target.value });
-  }
-
-  componentDidMount () {
     this.scrollCallback = window.addEventListener('scroll', this.handleScroll);
   }
 
