@@ -15,8 +15,9 @@ if(isset($_GET['image'])){
 function getImageList($root) {
 
     $most_files = array_merge(
-        glob($root . '/**/**/**/*.{jpg,JPG}', GLOB_BRACE),
-        glob($root . '/**/**/**/**/*.{jpg,JPG}', GLOB_BRACE)
+        glob($root . '/**/**/**/*.{jpg,JPG,jpeg}', GLOB_BRACE),
+        glob($root . '/**/**/**/**/*.{jpg,JPG,jpeg}', GLOB_BRACE),
+        glob($root . '/**/**/**/**/**/*.{jpg,JPG,jpeg}', GLOB_BRACE)
     );
 
     $most_files = array_filter($most_files, "image_is_not_thumb");
