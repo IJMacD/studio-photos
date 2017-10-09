@@ -81,10 +81,14 @@ export default class App extends React.Component {
     const { isLoading, items, isScrolled, searchTerm } = this.state;
 
     let filteredList = items;
-    const searchRegex = new RegExp(searchTerm, "i");
 
     if (searchTerm) {
-      filteredList = filteredList.filter(item => searchRegex.test(item.key));
+      try {
+        const searchRegex = new RegExp(searchTerm, "i");
+        filteredList = filteredList.filter(item => searchRegex.test(item.key));
+      } catch (e) {
+        filteredList = filteredList.filter(item => item.key.includes(searchTerm));
+      }
     }
 
     return (
