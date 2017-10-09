@@ -9,6 +9,10 @@ module.exports = {
 
     if(process.env.NODE_ENV != "production") {
       indexPath = path.join(__dirname, 'index.html');
+
+      app.get('/images.json', function(request, response) {
+        response.sendFile(path.join(__dirname, 'src', 'server', 'test_images.json'));
+      })
     }
 
     app.get('/', function(request, response) {

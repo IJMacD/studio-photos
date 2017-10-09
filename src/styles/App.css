@@ -36,14 +36,21 @@ h1 {
     font-size: 36px;
 }
 
+input[type=search] {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #DDD;
+}
+
 .jumbotron {
-  background: #532F8C;
+  background: #21b077;
   color: white;
   padding: 48px 0 80px;
   margin-bottom: 30px;
   text-align: center; }
   .jumbotron h1 {
     font-size: 63px;
+    text-shadow: 4px 4px 6px rgba(0,0,0,0.6);
   }
   .jumbotron p {
     margin-bottom: 15px;
@@ -53,13 +60,35 @@ h1 {
     max-width: 75%;
     margin: 1em auto 2em; }
 
+.toolbar {
+    background: #21b077;
+    color: white;
+    padding: 12px 8px;
+    position: fixed;
+    top: 0;
+    height: 48px;
+    width: 100%;
+    z-index: 2;
+    display: flex;
+}
+.toolbar h1 {
+    font-size: 24px;
+    margin: 0;
+    font-weight: bold;
+    flex: 1;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+}
+.toolbar input[type=search] {
+    flex: 0;
+}
+
 .container {
     margin: 0 30px;
 }
 
 .loading {
     width: 100%;
-    color: black;
+    color: white;
     margin-top: 10%;
     font-size: 1.2em;
     font-weight: bold;
@@ -89,7 +118,7 @@ h1 {
     to {
         transform: rotate(360deg)
     }
-} 
+}
 
 .loading2::before {
     content: "";
@@ -114,15 +143,60 @@ h1 {
     to {
         transform: translate(-20px);
     }
-} 
+}
 
 ul {
     list-style: none;
     text-align: center;
     margin: 0;
+    padding: 0;
 }
 
 li {
     display: inline-block;
     margin: 3px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 1px 1px 2px black;
+}
+
+li p {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: white;
+    text-decoration: none;
+    background: rgba(0,0,0,0.3);
+    text-align: left;
+    margin: 0;
+    padding: 0 3px;
+    height: 0;
+    transition: height 0.25s;
+}
+
+li:hover p {
+    height: 24px;
+    padding: 3px;
+}
+
+.toast {
+    position: fixed;
+    bottom: 0;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    text-align: center;
+}
+.toast p {
+    background: #212121;
+    color: white;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    text-align: center;
+    padding: 8px 16px;
+    font-weight: bold;
+    min-width: 200px;
+    display: inline-block;
+    margin: 0;
 }

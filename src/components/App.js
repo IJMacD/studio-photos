@@ -1,56 +1,141 @@
 import React from 'react'
+import path from 'path'
+
+import InfiniteScroll from './InfiniteScroll.js';
 
 import styles from '../styles/App.css';
 
+let imageIndexURL = 'http://192.168.0.138/studio-photos/images.php';
+let imageThumbURL = 'http://192.168.0.138/studio-photos/images.php?image=';
+let imageFullURL = 'http://192.168.0.138/studio-photos/images.php?full&image=';
+
+if(process.env.NODE_ENV != "production") {
+  imageIndexURL = '/images.json';
+}
 
 export default class App extends React.Component {
   constructor () {
     super();
-    
+
     this.state = {
       isLoading: true,
-      images: [],
-      lastIndex: 0,
+      items: [],
+      isScrolled: false,
+      searchTerm: "",
     };
 
-    this.serverResponse = fetch('http://192.168.0.138/studio-photos.php').then(r => r.json());
+    let inflateImage = img => {
+      const slashIndex = img.lastIndexOf('/') + 1;
+      const encodedURI = encodeURIComponent(img);
+      return {
+        key: img,
+        thumb: imageThumbURL + encodedURI,
+        full: imageFullURL + encodedURI,
+        name: img.substr(slashIndex, img.lastIndexOf('.') - slashIndex),
+      }
+    };
 
-    this.loadNextData();
+    if (process.env.NODE_ENV != "production") {
+      inflateImage = (img, i) => {
+        const slashIndex = img.lastIndexOf('/') + 1;
+        return {
+          key: img + i,
+          thumb: img,
+          full: img,
+          name: i,
+        }
+      }
+    }
+
+    fetch(imageIndexURL).then(r => r.json()).then(d => {
+      const items = d.images.map(inflateImage);
+      this.setState({isLoading: false, items});
+    }).catch(() => {
+      this.setState({ isLoading: false });
+    });
+
+    this.handleScroll = this.handleScroll.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
   }
 
-  loadNextData () {
-    this.serverResponse.then(d => {
-      const lastIndex = this.state.lastIndex + 12;
-      this.setState({isLoading:false, lastIndex, images: d.images.slice(0,lastIndex)});
-    });
+  handleScroll () {
+    const scrolled = window.scrollY > 20;
+    if (this.state.isScrolled != scrolled) {
+      this.setState({ isScrolled: scrolled });
+    }
+  }
+
+  handleSearch (e) {
+    this.setState({ searchTerm: e.target.value });
+  }
+
+  componentDidMount () {
+    this.scrollCallback = window.addEventListener('scroll', this.handleScroll);
+  }
+
+  componentWillUnmount () {
+    window.removeEventListener('scroll', this.scrollCallback);
   }
 
   render () {
-    const { isLoading, images } = this.state;
+    const { isLoading, items, isScrolled, searchTerm } = this.state;
+
+    let filteredList = items;
+
+    if (searchTerm) {
+      filteredList = filteredList.filter(item => item.key.includes(searchTerm));
+    }
 
     return (
       <div>
-        <div className={styles.jumbotron}>
+        <div className={isScrolled ? styles.toolbar : styles.jumbotron} >
           <h1>
-            Blank Project
+            Studio Photos
           </h1>
-          { isLoading ? 
-            <p className={styles.loading2}>Loading</p> :
-            <p>Welcome to the project</p>
-          }
+          <input type="search" placeholder="Search" onChange={this.handleSearch} value={searchTerm} />
         </div>
-        <div className={styles.container}>
-          <ul>
+        { isLoading &&
+          <p className={styles.loading2}>Loading</p>
+        }
+        <div className={styles.container} style={{marginTop: isScrolled ? 48: 0}}>
+          <InfiniteScroll
+            items={filteredList}
+            itemHeight="156"
+            itemWidth="156"
+          >
             {
-              images.map(image => {
-                const src = 'http://192.168.0.138/studio-photos.php?image=' + encodeURIComponent(image);
-                return <li key={image}><img src={src} width="150" height="150"/></li>
-              })
+              renderList
             }
-          </ul>
-          <button onClick={()=>this.loadNextData()}>Load More</button>
+          </InfiniteScroll>
         </div>
       </div>
     )
   }
+}
+
+const renderList = (items, {paddingTop, height}) => {
+  const midPoint = items && items[Math.floor(items.length/2)];
+  return [
+    <ul style={{ paddingTop, height }}>
+      {
+        items.map(item => <ListItem {...item} />)
+      }
+    </ul>,
+    midPoint && <div className={styles.toast}><p>{dirname(midPoint.key)}</p></div>
+  ];
+}
+
+const ListItem = (props) => {
+  const { thumb, full, name } = props;
+  return (
+    <li>
+      <a href={full} target="_blank">
+        <img src={thumb} width="150" height="150" />
+        <p>{ name }</p>
+      </a>
+    </li>);
+}
+
+function dirname (p) {
+  return path.basename(path.dirname(p));
 }
