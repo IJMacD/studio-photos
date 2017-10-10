@@ -5,7 +5,6 @@ module.exports = {
   devtool: 'eval',
 
   entry: [
-    'webpack-hot-middleware/client',
     './src/index'
   ],
 
@@ -14,10 +13,6 @@ module.exports = {
     filename: 'bundle.js',
     publicPath: '/public/'
   },
-
-  plugins: [
-    new webpack.HotModuleReplacementPlugin()
-  ],
 
   module: {
     rules: [
