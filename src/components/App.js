@@ -9,9 +9,7 @@ let imageIndexURL = 'http://192.168.0.138/studio-photos/images.php';
 let imageThumbURL = 'http://192.168.0.138/studio-photos/images.php?image=';
 let imageFullURL = 'http://192.168.0.138/studio-photos/images.php?full&image=';
 
-if(process.env.NODE_ENV != "production") {
-  imageIndexURL = '/images.json';
-}
+const SCROLL_SNAP = 200;
 
 export default class App extends React.Component {
   constructor () {
@@ -29,7 +27,7 @@ export default class App extends React.Component {
   }
 
   handleScroll () {
-    const scrolled = window.scrollY > 20;
+    const scrolled = window.scrollY > SCROLL_SNAP;
     if (this.state.isScrolled != scrolled) {
       this.setState({ isScrolled: scrolled });
     }
@@ -50,18 +48,6 @@ export default class App extends React.Component {
         name: img.substr(slashIndex, img.lastIndexOf('.') - slashIndex),
       }
     };
-
-    if (process.env.NODE_ENV != "production") {
-      inflateImage = (img, i) => {
-        const slashIndex = img.lastIndexOf('/') + 1;
-        return {
-          key: img + i,
-          thumb: img,
-          full: img,
-          name: i,
-        }
-      }
-    }
 
     fetch(imageIndexURL).then(r => r.json()).then(d => {
       const items = d.images.map(inflateImage);
@@ -102,7 +88,7 @@ export default class App extends React.Component {
         { isLoading &&
           <p className={styles.loading2}>Loading</p>
         }
-        <div className={styles.container} style={{marginTop: isScrolled ? 48: 0}}>
+        <div className={styles.container} style={{marginTop: isScrolled ? SCROLL_SNAP + 48: 0, marginBottom: 48}}>
           <InfiniteScroll
             items={filteredList}
             itemHeight="156"
@@ -118,15 +104,15 @@ export default class App extends React.Component {
   }
 }
 
-const renderList = (items, {paddingTop, height}) => {
-  const midPoint = items && items[Math.floor(items.length/2)];
+const renderList = (items, {paddingTop, height}, firstIndex) => {
+  const first = items && items[firstIndex];
   return [
     <ul style={{ paddingTop, height }}>
       {
         items.map(item => <ListItem {...item} />)
       }
     </ul>,
-    midPoint && <div className={styles.toast}><p>{dirname(midPoint.key)}</p></div>
+    first && <div className={styles.toast}><p>{dirname(first.key)}</p></div>
   ];
 }
 

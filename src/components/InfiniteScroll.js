@@ -42,12 +42,15 @@ export default class InfiniteScroll extends Component {
 
     const itemsPerRow = Math.floor(availableWidth / itemWidth) || 1;
 
-    const numRows = items.length / itemsPerRow;
+    const numRows = Math.ceil(items.length / itemsPerRow);
 
     const scrollBottom = scrollTop + availableHeight;
 
-    const firstRow = Math.max(0, Math.floor(scrollTop / itemHeight) - 4);
-    const lastRow = Math.min(numRows, Math.ceil(scrollBottom / itemHeight) + 4);
+    const firstVisibleRow = Math.floor(scrollTop / itemHeight);
+    const lastVisibleRow = Math.ceil(scrollBottom / itemHeight);
+
+    const firstRow = Math.max(0, firstVisibleRow - 4);
+    const lastRow = Math.min(numRows, lastVisibleRow + 4);
 
     const firstIndex = firstRow * itemsPerRow;
     const lastIndex = lastRow * itemsPerRow;
@@ -56,6 +59,6 @@ export default class InfiniteScroll extends Component {
 
     const style = { paddingTop: (firstRow * itemHeight), height: (itemHeight * numRows) };
 
-    return this.props.children(selected, style);
+    return this.props.children(selected, style, (firstVisibleRow - firstRow) * itemsPerRow);
   }
 }
