@@ -78,8 +78,15 @@ input[type=search] {
     flex: 1;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
 }
-.toolbar input[type=search] {
+.toolbar > * {
     flex: 0;
+}
+.toolbar > *:first-child {
+    flex: 1;
+}
+.toolbar > p {
+    white-space: nowrap;
+    margin: 4px 8px;
 }
 
 .container {

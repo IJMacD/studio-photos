@@ -83,6 +83,7 @@ export default class App extends React.Component {
           <h1>
             Studio Photos
           </h1>
+          <p>{ `${filteredList.length}  photo${(filteredList.length == 1) ? "" : "s"} ` }</p>
           <input type="search" placeholder="Search" onChange={this.handleSearch} value={searchTerm} />
         </div>
         { isLoading &&
