@@ -19,11 +19,12 @@ export default class App extends React.Component {
       isLoading: true,
       items: [],
       isScrolled: false,
-      searchTerm: "",
+      searchTerm: parseHashSearch(window.location.hash),
     };
 
     this.handleScroll = this.handleScroll.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
+    this.handleHashChange = this.handleHashChange.bind(this);
   }
 
   handleScroll () {
@@ -35,6 +36,18 @@ export default class App extends React.Component {
 
   handleSearch (e) {
     this.setState({ searchTerm: e.target.value });
+  }
+
+  handleHashChange (e) {
+    const searchTerm = parseHashSearch(window.location.hash);
+    this.setState({ searchTerm });
+  }
+
+  componentDidUpdate(oldProps, oldState) {
+    const { searchTerm } = this.state;
+    if(searchTerm !== oldState.searchTerm) {
+      window.location.hash = "q=" + encodeURIComponent(searchTerm);
+    }
   }
 
   componentDidMount () {
@@ -57,10 +70,12 @@ export default class App extends React.Component {
     });
 
     this.scrollCallback = window.addEventListener('scroll', this.handleScroll);
+    this.hashCallback = window.addEventListener('hashchange', this.handleHashChange);
   }
 
   componentWillUnmount () {
     window.removeEventListener('scroll', this.scrollCallback);
+    window.removeEventListener('hashchange', this.hashCallback);
   }
 
   render () {
@@ -130,4 +145,13 @@ const ListItem = (props) => {
 
 function dirname (p) {
   return path.basename(path.dirname(p));
+}
+
+function parseHashSearch(hash) {
+  const regex = /q=([^&]*)/;
+  const match = regex.exec(hash);
+
+  if(!match || match.length < 2) return "";
+
+  return decodeURIComponent(match[1]);
 }
