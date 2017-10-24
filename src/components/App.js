@@ -139,7 +139,7 @@ const ListItem = (props) => {
   const { thumb, full, name, onClick } = props;
   return (
     <li>
-      <a onClick={onClick} target="_blank">
+      <a href={full} onClick={e => { e.preventDefault(); onClick(e); }} target="_blank">
         <img src={thumb} width="150" height="150" />
         <p>{ name }</p>
       </a>

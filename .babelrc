@@ -2,5 +2,16 @@
   "presets": [
     "es2015",
     "react"
+  ],
+  "plugins":[
+    "transform-object-rest-spread"
   ]
+  // Hot Re-loading doesn't work with React 16
+  // "env": {
+  //     "development": {
+  //       "presets": [
+  //           "react-hmre"
+  //       ]
+  //     }
+  // }
 }

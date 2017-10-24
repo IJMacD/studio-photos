@@ -14,3 +14,12 @@
     max-width: 100%;
     display: block;
 }
+
+.metabox {
+    background: rgba(0,0,0, 0.8);
+    color: white;
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    padding: 8px;
+}
