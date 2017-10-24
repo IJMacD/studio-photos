@@ -1,9 +1,10 @@
 import React from 'react'
 import path from 'path'
 
-import InfiniteScroll from './InfiniteScroll.js';
+import InfiniteScroll from './InfiniteScroll';
+import ImagePreview from './ImagePreview';
 
-import styles from '../styles/App.css';
+import styles from './App.css';
 
 let imageIndexURL = 'http://192.168.0.138/studio-photos/images.php';
 let imageThumbURL = 'http://192.168.0.138/studio-photos/images.php?image=';
@@ -20,11 +21,24 @@ export default class App extends React.Component {
       items: [],
       isScrolled: false,
       searchTerm: parseHashSearch(window.location.hash),
+      selected: null,
     };
 
     this.handleScroll = this.handleScroll.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.handleHashChange = this.handleHashChange.bind(this);
+
+    this.renderList = (items, {paddingTop, height}, firstIndex) => {
+      const first = items && items[firstIndex];
+      return [
+        <ul style={{ paddingTop, height }}>
+          {
+            items.map(item => <ListItem {...item} onClick={() => this.setState({ selected: item.full })} />)
+          }
+        </ul>,
+        first && <div className={styles.toast}><p>{dirname(first.key)}</p></div>
+      ];
+    }
   }
 
   handleScroll () {
@@ -79,7 +93,7 @@ export default class App extends React.Component {
   }
 
   render () {
-    const { isLoading, items, isScrolled, searchTerm } = this.state;
+    const { isLoading, items, isScrolled, searchTerm, selected } = this.state;
 
     let filteredList = items;
 
@@ -98,7 +112,7 @@ export default class App extends React.Component {
           <h1>
             Studio Photos
           </h1>
-          <p>{ `${filteredList.length}  photo${(filteredList.length == 1) ? "" : "s"} ` }</p>
+          <p>{ `${filteredList.length} photo${(filteredList.length == 1) ? "" : "s"} ` }</p>
           <input type="search" placeholder="Search" onChange={this.handleSearch} value={searchTerm} />
         </div>
         { isLoading &&
@@ -111,32 +125,21 @@ export default class App extends React.Component {
             itemWidth="156"
           >
             {
-              renderList
+              this.renderList
             }
           </InfiniteScroll>
         </div>
+        { selected && <ImagePreview image={selected} onClose={() => this.setState({ selected: null })} /> }
       </div>
     )
   }
 }
 
-const renderList = (items, {paddingTop, height}, firstIndex) => {
-  const first = items && items[firstIndex];
-  return [
-    <ul style={{ paddingTop, height }}>
-      {
-        items.map(item => <ListItem {...item} />)
-      }
-    </ul>,
-    first && <div className={styles.toast}><p>{dirname(first.key)}</p></div>
-  ];
-}
-
 const ListItem = (props) => {
-  const { thumb, full, name } = props;
+  const { thumb, full, name, onClick } = props;
   return (
     <li>
-      <a href={full} target="_blank">
+      <a href={full} onClick={e => { e.preventDefault(); onClick(e); }} target="_blank">
         <img src={thumb} width="150" height="150" />
         <p>{ name }</p>
       </a>

@@ -5,6 +5,8 @@ module.exports = {
   devtool: 'eval',
 
   entry: [
+    // Hot Re-loading doesn't work with React 16
+    // 'webpack-hot-middleware/client',
     './src/index'
   ],
 
@@ -24,7 +26,12 @@ module.exports = {
       {
         test: /\.css$/,
         loader: 'style-loader!css-loader?modules&camelCase',
-        include: path.join(__dirname, 'src', 'styles'),
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.css$/,
+        loader: 'style-loader!css-loader',
+        include: /node_modules/,
       },
       {
         test: /\.png$/,
