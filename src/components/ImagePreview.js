@@ -32,11 +32,16 @@ export default class ImagePreview extends React.Component {
         const image = this.props.image;
         const exif = this.state.exif;
         const filename = path.basename(decodeURIComponent(image));
+        const foldername = path.basename(path.dirname(decodeURIComponent(image)));
 
         return (
             <div className={styles.shade} onClick={this.props.onClose}>
                 <img className={styles.image} src={this.props.image} />
                 <div className={styles.metabox} onClick={e => e.stopPropagation()}>
+                    <dl>
+                        <dt>Name</dt><dd>{filename}</dd>
+                        <dt>Folder</dt><dd>{foldername}</dd>
+                    </dl>
                     {exif && <EXIFData exif={exif} /> }
                     <a href={image} download={filename} target="_blank">
                         <Icon name="file_download" style={{color: 'white'}} title="Download" />
