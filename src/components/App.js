@@ -21,19 +21,20 @@ export default class App extends React.Component {
       items: [],
       isScrolled: false,
       searchTerm: parseHashSearch(window.location.hash),
-      selected: null,
+      selected: false,
     };
 
     this.handleScroll = this.handleScroll.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.handleHashChange = this.handleHashChange.bind(this);
+    this.handleKeypress = this.handleKeypress.bind(this);
 
     this.renderList = (items, {paddingTop, height}, firstIndex) => {
       const first = items && items[firstIndex];
       return [
         <ul style={{ paddingTop, height }}>
           {
-            items.map(item => <ListItem {...item} onClick={() => this.setState({ selected: item.full })} />)
+            items.map((item,i) => <ListItem {...item} onClick={() => this.setState({ selected: i })} />)
           }
         </ul>,
         first && <div className={styles.toast}><p>{dirname(first.key)}</p></div>
@@ -55,6 +56,19 @@ export default class App extends React.Component {
   handleHashChange (e) {
     const searchTerm = parseHashSearch(window.location.hash);
     this.setState({ searchTerm });
+  }
+
+  handleKeypress (e) {
+    let selected = this.state.selected;
+    if (selected !== false) {
+      if (e.which == 37) {  // ArrowLeft
+        selected--;
+        this.setState({ selected });
+      } else if (e.which == 39) { // ArrowRight
+        selected++;
+        this.setState({ selected });
+      }
+    }
   }
 
   componentDidUpdate(oldProps, oldState) {
@@ -85,11 +99,13 @@ export default class App extends React.Component {
 
     this.scrollCallback = window.addEventListener('scroll', this.handleScroll);
     this.hashCallback = window.addEventListener('hashchange', this.handleHashChange);
+    this.keyCallback = window.addEventListener("keydown", this.handleKeypress);
   }
 
   componentWillUnmount () {
     window.removeEventListener('scroll', this.scrollCallback);
     window.removeEventListener('hashchange', this.hashCallback);
+    window.removeEventListener('keydown', this.keyCallback);
   }
 
   render () {
@@ -105,6 +121,8 @@ export default class App extends React.Component {
         filteredList = filteredList.filter(item => item.key.includes(searchTerm));
       }
     }
+
+    const selectedItem = selected === false ? null : filteredList[Math.max(0, Math.min(selected, filteredList.length-1))];
 
     return (
       <div>
@@ -129,7 +147,7 @@ export default class App extends React.Component {
             }
           </InfiniteScroll>
         </div>
-        { selected && <ImagePreview image={selected} onClose={() => this.setState({ selected: null })} /> }
+        { selectedItem && <ImagePreview image={selectedItem} onClose={() => this.setState({ selected: false })} /> }
       </div>
     )
   }
