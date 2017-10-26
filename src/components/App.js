@@ -19,6 +19,7 @@ export default class App extends React.Component {
     this.state = {
       isLoading: true,
       items: [],
+      filteredList: [],
       isScrolled: false,
       searchTerm: parseHashSearch(window.location.hash),
       selected: false,
@@ -34,12 +35,16 @@ export default class App extends React.Component {
       return [
         <ul style={{ paddingTop, height }}>
           {
-            items.map((item,i) => <ListItem {...item} onClick={() => this.setState({ selected: i })} />)
+            items.map(item => <ListItem {...item} onClick={() => this.setState({ selected: this.findIndex(item.key) })} />)
           }
         </ul>,
         first && <div className={styles.toast}><p>{dirname(first.key)}</p></div>
       ];
     }
+  }
+
+  findIndex (key) {
+    return this.state.filteredList.findIndex(item => item.key === key);
   }
 
   handleScroll () {
@@ -50,12 +55,16 @@ export default class App extends React.Component {
   }
 
   handleSearch (e) {
-    this.setState({ searchTerm: e.target.value });
+    const searchTerm = e.target.value;
+    const filteredList = getFilteredList(this.state.items, searchTerm);
+    this.setState({ searchTerm, filteredList });
   }
 
   handleHashChange (e) {
     const searchTerm = parseHashSearch(window.location.hash);
-    this.setState({ searchTerm });
+    const filteredList = getFilteredList(this.state.items, searchTerm);
+
+    this.setState({ searchTerm, filteredList });
   }
 
   handleKeypress (e) {
@@ -92,7 +101,8 @@ export default class App extends React.Component {
 
     fetch(imageIndexURL).then(r => r.json()).then(d => {
       const items = d.images.map(inflateImage);
-      this.setState({ isLoading: false, items });
+      const filteredList = getFilteredList(items, this.state.searchTerm);
+      this.setState({ isLoading: false, items, filteredList });
     }).catch(() => {
       this.setState({ isLoading: false });
     });
@@ -109,18 +119,7 @@ export default class App extends React.Component {
   }
 
   render () {
-    const { isLoading, items, isScrolled, searchTerm, selected } = this.state;
-
-    let filteredList = items;
-
-    if (searchTerm) {
-      try {
-        const searchRegex = new RegExp(searchTerm, "i");
-        filteredList = filteredList.filter(item => searchRegex.test(item.key));
-      } catch (e) {
-        filteredList = filteredList.filter(item => item.key.includes(searchTerm));
-      }
-    }
+    const { isLoading, filteredList, isScrolled, searchTerm, selected } = this.state;
 
     const selectedItem = selected === false ? null : filteredList[Math.max(0, Math.min(selected, filteredList.length-1))];
 
@@ -175,4 +174,19 @@ function parseHashSearch(hash) {
   if(!match || match.length < 2) return "";
 
   return decodeURIComponent(match[1]);
+}
+
+function getFilteredList(list, searchTerm) {
+  let filteredList = list;
+
+  if (searchTerm) {
+    try {
+      const searchRegex = new RegExp(searchTerm, "i");
+      filteredList = list.filter(item => searchRegex.test(item.key));
+    } catch (e) {
+      filteredList = list.filter(item => item.key.includes(searchTerm));
+    }
+  }
+
+  return filteredList;
 }
