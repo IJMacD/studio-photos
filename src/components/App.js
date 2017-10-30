@@ -56,15 +56,17 @@ export default class App extends React.Component {
 
   handleSearch (e) {
     const searchTerm = e.target.value;
+    // Pre-calculate (impure-ish); TODO: use memoisation
     const filteredList = getFilteredList(this.state.items, searchTerm);
     this.setState({ searchTerm, filteredList });
   }
 
   handleHashChange (e) {
     const searchTerm = parseHashSearch(window.location.hash);
+    // Pre-calculate (impure-ish); TODO: use memoisation
     const filteredList = getFilteredList(this.state.items, searchTerm);
 
-    this.setState({ searchTerm, filteredList });
+    this.setState({ searchTerm, filteredList, selected: false });
   }
 
   handleKeypress (e) {
@@ -83,7 +85,7 @@ export default class App extends React.Component {
   componentDidUpdate(oldProps, oldState) {
     const { searchTerm } = this.state;
     if(searchTerm !== oldState.searchTerm) {
-      window.location.hash = "q=" + encodeURIComponent(searchTerm);
+      window.location.hash = searchTerm ? "q=" + encodeURIComponent(searchTerm) : "";
     }
   }
 
@@ -101,6 +103,7 @@ export default class App extends React.Component {
 
     fetch(imageIndexURL).then(r => r.json()).then(d => {
       const items = d.images.map(inflateImage);
+      // Pre-calculate (impure-ish); TODO: use memoisation
       const filteredList = getFilteredList(items, this.state.searchTerm);
       this.setState({ isLoading: false, items, filteredList });
     }).catch(() => {

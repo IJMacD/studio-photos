@@ -33,11 +33,13 @@ export default class ImagePreview extends React.Component {
 
         return (
             <div className={styles.shade} onClick={this.props.onClose}>
-                <img className={styles.image} src={srcFull} />
+                <a href={srcFull} target="_blank" onClick={e => {e.preventDefault(); this.props.onClose()}}>
+                    <img className={styles.image} src={srcFull} />
+                </a>
                 <div className={styles.metabox} onClick={e => e.stopPropagation()}>
                     <dl>
                         <dt>Name</dt><dd>{filename}</dd>
-                        <dt>Folder</dt><dd>{foldername}</dd>
+                        <dt>Folder</dt><dd><a href={"#q="+encodeURIComponent(foldername)} onClick={this.props.onClose}>{foldername}</a></dd>
                     </dl>
                     {exif && <EXIFData exif={exif} /> }
                     <a href={srcFull} download={filename} target="_blank">

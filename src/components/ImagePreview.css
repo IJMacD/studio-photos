@@ -24,3 +24,8 @@
     padding: 8px;
     max-width: 300px;
 }
+
+.metabox a,
+.metabox a:visited {
+    color: white;
+}
