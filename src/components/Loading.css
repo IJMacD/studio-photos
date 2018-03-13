@@ -1,0 +1,18 @@
+#dot {
+    animation: bounce 0.75s ease-out infinite alternate;
+}
+
+.spin #dot {
+    transform-origin: 4px 9px;
+    animation: spin 5s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0% { transform: translateY(0) }
+    100% { transform: translateY(-2px) }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0);  }
+    100% { transform: rotate(360deg) }
+}

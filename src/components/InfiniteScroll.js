@@ -1,9 +1,18 @@
 import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 
+/**
+ * @typedef InfiniteScrollProps
+ * @prop {(items: any[], style: any, index: number) => React.ReactNode} children
+ * @prop {any[]} items
+ * @prop {number} itemHeight
+ * @prop {number} itemWidth
+ */
+
+ /** @augments Component<InfiniteScrollProps> */
 export default class InfiniteScroll extends Component {
-  constructor () {
-    super();
+  constructor (props) {
+    super(props);
 
     this.state = {
       scrollTop: 0,
@@ -37,7 +46,7 @@ export default class InfiniteScroll extends Component {
   }
 
   render () {
-    const { items, ItemComponent, WrapComponent, itemHeight, itemWidth } = this.props;
+    const { items, itemHeight, itemWidth } = this.props;
     const { scrollTop, availableHeight, availableWidth } = this.state;
 
     const itemsPerRow = Math.floor(availableWidth / itemWidth) || 1;

@@ -3,6 +3,7 @@ import path from 'path'
 
 import InfiniteScroll from './InfiniteScroll';
 import ImagePreview from './ImagePreview';
+import Loading from './Loading';
 
 import styles from './App.css';
 
@@ -12,10 +13,30 @@ let imageFullURL = 'http://192.168.0.138/studio-photos/images.php?full&image=';
 
 const SCROLL_SNAP = 200;
 
-export default class App extends React.Component {
-  constructor () {
-    super();
+/**
+ * @typedef Item
+ * @prop {string} key
+ * @prop {string} thumb
+ * @prop {string} full
+ * @prop {string} name
+ */
 
+/**
+ * @typedef AppState
+ * @prop {boolean} isLoading
+ * @prop {Item[]} items
+ * @prop {Item[]} filteredList
+ * @prop {boolean} isScrolled
+ * @prop {string} searchTerm
+ * @prop {number|false} selected
+ */
+
+ /** @augments React.Component<{}, AppState> */
+export default class App extends React.Component {
+  constructor (props) {
+    super(props);
+
+    /** @type {AppState} */
     this.state = {
       isLoading: true,
       items: [],
@@ -29,20 +50,32 @@ export default class App extends React.Component {
     this.handleSearch = this.handleSearch.bind(this);
     this.handleHashChange = this.handleHashChange.bind(this);
     this.handleKeypress = this.handleKeypress.bind(this);
+  }
 
-    this.renderList = (items, {paddingTop, height}, firstIndex) => {
-      const first = items && items[firstIndex];
-      return [
+  /**
+   *
+   * @param {Item[]} items
+   * @param {any} style
+   * @param {number} firstIndex
+   */
+  renderList (items, {paddingTop, height}, firstIndex) {
+    const first = items && items[firstIndex];
+    return (
+      <React.Fragment>
         <ul style={{ paddingTop, height }}>
           {
             items.map(item => <ListItem {...item} onClick={() => this.setState({ selected: this.findIndex(item.key) })} />)
           }
-        </ul>,
-        first && <div className={styles.toast}><p>{dirname(first.key)}</p></div>
-      ];
-    }
+        </ul>
+        { first && <div className={styles.toast}><p>{dirname(first.key)}</p></div> }
+      </React.Fragment>
+    );
   }
 
+  /**
+   *
+   * @param {string} key
+   */
   findIndex (key) {
     return this.state.filteredList.findIndex(item => item.key === key);
   }
@@ -78,6 +111,8 @@ export default class App extends React.Component {
       } else if (e.which == 39) { // ArrowRight
         selected++;
         this.setState({ selected });
+      } else if (e.key === "Escape") {
+        this.setState({ selected: false });
       }
     }
   }
@@ -90,6 +125,7 @@ export default class App extends React.Component {
   }
 
   componentDidMount () {
+    /** @type {(string) => Item} */
     let inflateImage = img => {
       const slashIndex = img.lastIndexOf('/') + 1;
       const encodedURI = encodeURIComponent(img);
@@ -136,7 +172,7 @@ export default class App extends React.Component {
           <input type="search" placeholder="Search" onChange={this.handleSearch} value={searchTerm} />
         </div>
         { isLoading &&
-          <p className={styles.loading2}>Loading</p>
+          <p className={styles.loading}><Loading /><br />Loading</p>
         }
         <div className={styles.container} style={{marginTop: isScrolled ? SCROLL_SNAP + 48: 0, marginBottom: 48}}>
           <InfiniteScroll
@@ -145,7 +181,7 @@ export default class App extends React.Component {
             itemWidth="156"
           >
             {
-              this.renderList
+              this.renderList.bind(this)
             }
           </InfiniteScroll>
         </div>
@@ -155,6 +191,13 @@ export default class App extends React.Component {
   }
 }
 
+/**
+ * @param {object} props
+ * @param {string} props.thumb
+ * @param {string} props.full
+ * @param {string} props.name
+ * @param {(MouseEvent) => void} props.onClick
+ */
 const ListItem = (props) => {
   const { thumb, full, name, onClick } = props;
   return (
@@ -179,6 +222,12 @@ function parseHashSearch(hash) {
   return decodeURIComponent(match[1]);
 }
 
+/**
+ *
+ * @param {Item[]} list
+ * @param {string} searchTerm
+ * @return {Item[]}
+ */
 function getFilteredList(list, searchTerm) {
   let filteredList = list;
 

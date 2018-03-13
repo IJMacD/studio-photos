@@ -2,20 +2,52 @@ import React from 'react';
 import EXIF from 'exif-js';
 import path from 'path';
 
+import Loading from './Loading';
+
 import styles from './ImagePreview.css';
 
-export default class ImagePreview extends React.Component {
-    constructor() {
-        super();
+/**
+ * @typedef Item
+ * @prop {string} key
+ * @prop {string} thumb
+ * @prop {string} full
+ * @prop {string} name
+ */
 
+/**
+ * @typedef ImagePreviewProps
+ * @prop {Item} image
+ * @prop {() => void} onClose
+ */
+
+/**
+ * @typedef ImagePreviewState
+ * @prop {any} exif
+ */
+
+ /** @augments React.Component<ImagePreviewProps, ImagePreviewState> */
+export default class ImagePreview extends React.Component {
+
+    /**
+     *
+     * @param {ImagePreviewProps} props
+     */
+    constructor (props) {
+        super(props);
+
+        /** @type {ImagePreviewState} */
         this.state = {
             exif: null,
         };
 
     }
 
+    /**
+     * @param {ImagePreviewProps} nextProps
+     */
     componentWillReceiveProps(nextProps) {
         if (this.props.image !== nextProps.image) {
+            this.setState({ exif: null });
             getExifData(nextProps.image.full).then(exif => this.setState({ exif }));
         }
     }
@@ -34,7 +66,7 @@ export default class ImagePreview extends React.Component {
         return (
             <div className={styles.shade} onClick={this.props.onClose}>
                 <a href={srcFull} target="_blank" onClick={e => {e.preventDefault(); this.props.onClose()}}>
-                    <img className={styles.image} src={srcFull} />
+                    <ImageLoader className={styles.image} src={srcFull} />
                 </a>
                 <div className={styles.metabox} onClick={e => e.stopPropagation()}>
                     <dl>
@@ -53,14 +85,14 @@ export default class ImagePreview extends React.Component {
 
 const EXIFData = ({ exif }) => (
     <dl>
-        {exif.DateTime && [<dt>Date</dt>,<dd>{exif.DateTime.replace(/(\d{4}):(\d{2}):(\d{2})/, "$1-$2-$3")}</dd>] }
-        {exif.PixelXDimension && exif.PixelYDimension && [<dt>Resolution</dt>,<dd>{exif.PixelXDimension}x{exif.PixelYDimension}</dd>] }
-        {exif.Make && exif.Model && [<dt>Camera</dt>,<dd>{!exif.Model.startsWith(exif.Make) && trim(exif.Make)} {trim(exif.Model)}</dd>] }
-        {exif.FNumber && [<dt>F-stop</dt>,<dd>f/{exif.FNumber.toString()}</dd>] }
-        {exif.ExposureTime && [<dt>Exposure</dt>,<dd>1/{Math.round(exif.ExposureTime.denominator/exif.ExposureTime.numerator)}s</dd>] }
-        {exif.ISOSpeedRatings && [<dt>ISO speed</dt>,<dd>ISO-{exif.ISOSpeedRatings}</dd>] }
-        {exif.Flash && [<dt>Flash</dt>,<dd>{exif.Flash}</dd>] }
-        {exif.GPSLatitude && [<dt>Location</dt>,<dd>{formatCoords(exif.GPSLatitude)} {exif.GPSLatitudeRef}<br/>{formatCoords(exif.GPSLongitude)} {exif.GPSLongitudeRef}</dd>] }
+        {exif.DateTime && <React.Fragment><dt>Date</dt><dd>{exif.DateTime.replace(/(\d{4}):(\d{2}):(\d{2})/, "$1-$2-$3")}</dd></React.Fragment> }
+        {exif.PixelXDimension && exif.PixelYDimension && <React.Fragment><dt>Resolution</dt><dd>{exif.PixelXDimension}x{exif.PixelYDimension}</dd></React.Fragment> }
+        {exif.Make && exif.Model && <React.Fragment><dt>Camera</dt><dd>{!exif.Model.startsWith(exif.Make) && trim(exif.Make)} {trim(exif.Model)}</dd></React.Fragment> }
+        {exif.FNumber && <React.Fragment><dt>F-stop</dt><dd>f/{exif.FNumber.toString()}</dd></React.Fragment> }
+        {exif.ExposureTime && <React.Fragment><dt>Exposure</dt><dd>1/{Math.round(exif.ExposureTime.denominator/exif.ExposureTime.numerator)}s</dd></React.Fragment> }
+        {exif.ISOSpeedRatings && <React.Fragment><dt>ISO speed</dt><dd>ISO-{exif.ISOSpeedRatings}</dd></React.Fragment> }
+        {exif.Flash && <React.Fragment><dt>Flash</dt><dd>{exif.Flash}</dd></React.Fragment> }
+        {exif.GPSLatitude && <React.Fragment><dt>Location</dt><dd>{formatCoords(exif.GPSLatitude)} {exif.GPSLatitudeRef}<br/>{formatCoords(exif.GPSLongitude)} {exif.GPSLongitudeRef}</dd></React.Fragment> }
     </dl>
 );
 
@@ -83,4 +115,42 @@ function getExifData(url) {
         img.onerror = reject;
         img.src = url;
     });
+}
+
+class ImageLoader extends React.Component {
+    constructor (props) {
+        super(props);
+
+        this.state = {
+            loaded: false,
+            error: false,
+        };
+    }
+
+    loadImage (src) {
+        if (this.ref) {
+            const img = this.ref;
+            img.onload = () => this.setState({ loaded: true });
+            img.onerror = () => this.setState({ error: true });
+        }
+    }
+
+    componentDidMount () {
+        this.loadImage();
+    }
+
+    componentDidUpdate (prevProps) {
+        if (prevProps.src !== this.props.src) {
+            this.setState({ loaded: false });
+            this.loadImage();
+        }
+    }
+
+    render () {
+        const { loaded } = this.state;
+        return <React.Fragment>
+            <img {...this.props} ref={r => this.ref = r} style={{ display: loaded ? "" : "none" }} />
+            { !loaded && <Loading spinner /> }
+        </React.Fragment>;
+    }
 }
