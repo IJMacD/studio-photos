@@ -40,6 +40,14 @@ export default class ImagePreview extends React.Component {
             exif: null,
         };
 
+        this.handleEXIFLoad = this.handleEXIFLoad.bind(this);
+    }
+
+    handleEXIFLoad ({ url, exif }) {
+        if (url === this.props.image.full) {
+            // Only update state if url matches current props
+            this.setState({ exif });
+        }
     }
 
     /**
@@ -47,13 +55,14 @@ export default class ImagePreview extends React.Component {
      */
     componentWillReceiveProps(nextProps) {
         if (this.props.image !== nextProps.image) {
-            this.setState({ exif: null });
-            getExifData(nextProps.image.full).then(exif => this.setState({ exif }));
+            this.setState({ exif: null }); // Make sure EXIF data is blanked between images
+
+            getExifData(nextProps.image.full).then(this.handleEXIFLoad);
         }
     }
 
     componentDidMount() {
-        getExifData(this.props.image.full).then(exif => this.setState({ exif }));
+        getExifData(this.props.image.full).then(this.handleEXIFLoad);
     }
 
     render () {
@@ -111,7 +120,7 @@ function trim (s) {
 function getExifData(url) {
     return new Promise((resolve, reject) => {
         const img = new Image();
-        img.onload = () => EXIF.getData(img, () => resolve(EXIF.getAllTags(img)));
+        img.onload = () => EXIF.getData(img, () => resolve({ url, exif: EXIF.getAllTags(img) }));
         img.onerror = reject;
         img.src = url;
     });
@@ -124,10 +133,16 @@ class ImageLoader extends React.Component {
         this.state = {
             loaded: false,
             error: false,
+            showSpinner: false,
         };
     }
 
     loadImage (src) {
+        this.setState({ loaded: false, showSpinner: false });
+
+        // Only show spinner if image is taking a long time to load (more than 0.5s)
+        this.spinnerTimeout = setTimeout(() => this.setState({ showSpinner: true}), 500);
+
         if (this.ref) {
             const img = this.ref;
             img.onload = () => this.setState({ loaded: true });
@@ -141,16 +156,19 @@ class ImageLoader extends React.Component {
 
     componentDidUpdate (prevProps) {
         if (prevProps.src !== this.props.src) {
-            this.setState({ loaded: false });
             this.loadImage();
         }
     }
 
+    componentWillUnmount () {
+        clearTimeout(this.spinnerTimeout);
+    }
+
     render () {
-        const { loaded } = this.state;
+        const { loaded, showSpinner } = this.state;
         return <React.Fragment>
-            <img {...this.props} ref={r => this.ref = r} style={{ display: loaded ? "" : "none" }} />
-            { !loaded && <Loading spinner /> }
+            { !loaded && <Loading spinner style={{ opacity: showSpinner ? 1 : 0, transition: "1s all" }} /> } }
+            <img {...this.props} ref={r => this.ref = r} style={{ opacity: loaded ? 1 : 0, transition: "0.5s all" }} />
         </React.Fragment>;
     }
 }

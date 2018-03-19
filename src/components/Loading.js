@@ -18,6 +18,10 @@ export default function Loading (props) {
         strokeWidth: 0.17720792,
     };
 
+    const { style = {} } = props;
+
+    style.overflow = "visible";
+
     return (
         <svg
            width="64"
@@ -26,7 +30,7 @@ export default function Loading (props) {
            version="1.1"
            id="svg5211"
            className={props.spinner ? styles.spin : styles.bounce}
-           style={{ overflow: "visible" }}
+           style={style}
         >
           <defs
              id="defs5205">
